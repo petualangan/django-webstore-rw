@@ -38,6 +38,19 @@ class Order(models.Model):
     def __str__(self):
         return str(self.id) # id itu auto dibuatin sama django | karena angka, diconvert dulu jadi string
 
+    @property
+    def get_cart_total(self): #menghitung total biaya
+        orderitems = self.orderitem_set.all()
+        total = sum([item.get_total for item in orderitems])
+        return total
+
+    @property
+    def get_cart_items(self): # menghitung total barang yang dibeli
+        orderitems = self.orderitem_set.all()
+        total = sum([item.quantity for item in orderitems])
+        return total
+
+
 class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True) #kalau SET_NULL harus diikutin null=True, kata mas verdyevan
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
