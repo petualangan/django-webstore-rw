@@ -39,6 +39,15 @@ class Order(models.Model):
         return str(self.id) # id itu auto dibuatin sama django | karena angka, diconvert dulu jadi string
 
     @property
+    def shipping(self):
+        shipping = False
+        orderItems = self.orderitem_set.all()
+        for i in orderItems:
+            if i.product.digital == False: # kan di class Product, digital dibuat false, nah kalau digitalnya false otomatis butuh pengiriman
+                shipping = True
+        return shipping
+
+    @property
     def get_cart_total(self): #menghitung total biaya
         orderitems = self.orderitem_set.all()
         total = sum([item.get_total for item in orderitems])
