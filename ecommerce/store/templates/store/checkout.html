@@ -44,6 +44,7 @@
         <br>
         <div class="box-element hidden" id="payment-info">
             <small>Paypal Options</small>
+            <button id="make-payment">Make Payment</button>
         </div>
     </div>
 
@@ -67,5 +68,86 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+var shipping = '{{order.shipping}}' //<!-- ini dari models.py bagian class Order methodnya shipping -->
+    var total = '{{order.get_cart_total|floatformat:2}}'
+
+    if(shipping == 'False') {
+        document.getElementById('shipping-info').innerHTML = '' //<!-- di document html ini, cari tag ber Id 'shipping-info' (liat diatas), terus yang didalem ID itu di sembunyiin  -->
+    }
+
+    if(user != 'AnonymousUser'){ //<!-- kalo user bukan anonim, -->
+        document.getElementById('user-info').innerHTML = ''  //<!-- user-info di hidden, username sama e-mail -->
+    }
+
+    if(shipping == 'False' && user != 'AnonymousUser'){ //<!-- langsung akan memunculkan payment info. kalo user bukan anonim, dan barang ngga butuh shipping -->
+        document.getElementById('form-wrapper').classList.add('hidden');
+        document.getElementById('payment-info').classList.remove('hidden');
+    }
+
+    var form = document.getElementById('form') //<!-- cari tag yang punya Id form -->
+    form.addEventListener('submit', function(e){    //<!-- di button Continue type-nya kan submit -->
+        e.preventDefault()
+        console.log('Form Submitted...')
+        document.getElementById('form-button').classList.add('hidden'); //<!-- pas tombol COntinue diklik, maka tombolnya ke hidden -->
+        document.getElementById('payment-info').classList.remove('hidden'); //<!-- kalo liat diatas Id payment-info di hidden, nah hiddenya di remove terus payment-info bakal muncul -->
+    })
+
+    document.getElementById('make-payment').addEventListener('click', function(e){
+        submitFormData()
+    })
+
+    function submitFormData(){
+        console.log('Payment button clicked')
+
+        var userFormData = {
+            'name': null,
+            'email': null,
+            'total': total //<!-- total itu var yang dah dibuat diatas-->
+        }
+
+        var shippingInfo = { //<!-- address, dst diambil dari name yang ada di Id='shipping-info' -->
+            'address': null,
+            'city': null,
+            'state': null,
+            'zipcode': null,
+            'country': null
+        }
+
+        if(shipping != 'False'){
+            shippingInfo.address = form.address.value //<!-- ambil value yang dimasukin user, ke key address-->
+            shippingInfo.city = form.city.value
+            shippingInfo.state = form.state.value
+            shippingInfo.zipcode = form.zipcode.value
+            shippingInfo.country = form.country.value
+        }
+
+        if(user == 'AnonymousUser'){
+            userFormData.name = form.name.value
+            userFormData.email = form.email.value
+        }
+
+        console.log('Shipping Info:', shippingInfo)
+        console.log('User Info:', userFormData)
+
+        var url = '/process_order/'
+        fetch(url, {
+            method: 'POST',//<!-- methodnya post -->
+            headers: {
+                'Content-Type': 'application/json', //<!-- bentuknya json-->
+                'X-CSRFToken': csrftoken
+            },
+            body:JSON.stringify({'form':userFormData, 'shipping':shippingInfo}), //<!-- ambil dari variable yang dah dibuat userFormData, dan shippingInfo-->
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log('Success:', data)
+            alert('Transaction completed'); //<!-- memunculkan alert di browser-->
+            window.location.href = '{% url 'store' %}' //<!-- berpindah kehalaman store -->
+        })
+    }
+
+</script>
 
 {% endblock content %}

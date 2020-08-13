@@ -1,6 +1,6 @@
 var updateBtns = document.getElementsByClassName('update-cart') // sesuai sama class css yang di store.html
 
-for(i = 0; i < updateBtns.length; i++) {
+for(i = 0; i < updateBtns.length; i++){
     updateBtns[i].addEventListener('click', function(){
         var productId = this.dataset.product
         var action = this.dataset.action
@@ -31,7 +31,7 @@ function updateUserOrder(productId, action){
         .then((response) => { // ini promise. masih belum tau itu apaan
             return response.json();
         })
-         .then((data) => {
+        .then((data) => {
              console.log('Data:', data)
              location.reload() // update angka di logo keranjang
         });
