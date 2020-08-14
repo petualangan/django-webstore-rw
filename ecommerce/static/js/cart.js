@@ -8,7 +8,7 @@ for(i = 0; i < updateBtns.length; i++){
 
         console.log('USER:', user)
         if (user == 'AnonymousUser'){ //kalau user belum login
-            console.log('User is not authenticated')
+            addCookieItem(productId, action)
         }else{ // kalau user udah login
             updateUserOrder(productId, action)
         }
@@ -36,4 +36,29 @@ function updateUserOrder(productId, action){
              location.reload() // update angka di logo keranjang
         });
 
+}
+
+// fungsi yang berjalan kalau user belum login
+function addCookieItem(productId, action){
+	console.log('User is not authenticated')
+
+	if(action == 'add'){    // menambah product kalau actionnya add
+		if (cart[productId] == undefined){
+			cart[productId] = {'quantity':1}
+		}else{
+			cart[productId]['quantity'] += 1
+		}
+	}
+	if(action == 'remove'){
+		cart[productId]['quantity'] -= 1
+
+		if(cart[productId][quantity] <= 0){ // kalau kurang dari satu, delete product
+			console.log('Item should be deleted')
+			delete cart[productId]
+		}
+	}
+	console.log('CART:', cart)
+	document.cookie = 'cart=' + JSON.stringify(cart) + ";domain;path=/"
+
+	location.reload()
 }

@@ -35,9 +35,38 @@ def cart(request):
         items = order.orderitem_set.all()
         cartItems = order.get_cart_items
     else:
+        try:
+            cart = json.loads(request.COOKIES['cart'])
+        except:
+            cart = {}
+            print('CART:', cart)
         items = [] #kalo nggak, itemnya kosong
         order = {'get_cart_total': 0, 'get_cart_items': 0} #percobaan kalau logout (ngga ada user login di localhost/admin), efeknya halaman cart akan kosong
         cartItems = order['get_cart_items']
+
+        for i in cart:
+            cartItems += cart[i]['quantity'] # ditambah sama quantitiy, tiap product dibedakan sama id nya (kalau ngga salah sih gitu pemahamanku)
+
+            # render total harganya -> biar muncul di cart.html
+            product = Product.objects.get(id=i)
+            total = (product.price * cart[i]['quantity'])
+
+            order['get_cart_total'] += total
+            order['get_cart_items'] += cart[i]['quantity']
+
+            # render itemnya
+            item = {
+                'product': {
+                    'id': product.id,
+                    'name': product.name,
+                    'price': product.price,
+                    'imageURL': product.imageURL
+                },
+                'quantity': cart[i]['quantity'],
+                'get_total': total,
+            }
+
+            items.append(item)
 
     context = {
         'items': items,
