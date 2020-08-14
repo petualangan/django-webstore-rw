@@ -31,9 +31,6 @@
                     <div class="form-field">
                         <input class="form-control" type="text" name="zipcode" placeholder="Zipcode..">
                     </div>
-                    <div class="form-field">
-                        <input class="form-control" type="text" name="country" placeholder="Country..">
-                    </div>
                 </div>
 
                 <hr>
@@ -111,8 +108,7 @@ var shipping = '{{order.shipping}}' //<!-- ini dari models.py bagian class Order
             'address': null,
             'city': null,
             'state': null,
-            'zipcode': null,
-            'country': null
+            'zipcode': null
         }
 
         if(shipping != 'False'){
@@ -120,7 +116,6 @@ var shipping = '{{order.shipping}}' //<!-- ini dari models.py bagian class Order
             shippingInfo.city = form.city.value
             shippingInfo.state = form.state.value
             shippingInfo.zipcode = form.zipcode.value
-            shippingInfo.country = form.country.value
         }
 
         if(user == 'AnonymousUser'){
