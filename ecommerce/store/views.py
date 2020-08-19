@@ -3,20 +3,14 @@ from .models import * #import semua yang ada di models
 from django.http import JsonResponse
 import json
 import datetime
+from .utils import cookieCart, cartData
 
 # Create your views here.
 # Mendefinisikan halaman web
 
 def store(request):
-    if request.user.is_authenticated:
-        customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        items = order.orderitem_set.all()
-        cartItems = order.get_cart_items
-    else:
-        items = []  # kalo nggak, itemnya kosong
-        order = {'get_cart_total': 0,'get_cart_items': 0}  # percobaan kalau logout (ngga ada user login di localhost/admin), efeknya halaman cart akan kosong
-        cartItems = order['get_cart_items']
+    data = cartData(request)
+    cartItems = data['cartItems']
 
     products = Product.objects.all() #nyimpen semua isi dari Product yang ada dimodels ke -> products
 
@@ -28,45 +22,10 @@ def store(request):
     return render(request, 'store/store.html', context) # template store.html didalem folder store
 
 def cart(request):
-    #kalau usernya login
-    if request.user.is_authenticated:
-        customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        items = order.orderitem_set.all()
-        cartItems = order.get_cart_items
-    else:
-        try:
-            cart = json.loads(request.COOKIES['cart'])
-        except:
-            cart = {}
-            print('CART:', cart)
-        items = [] #kalo nggak, itemnya kosong
-        order = {'get_cart_total': 0, 'get_cart_items': 0} #percobaan kalau logout (ngga ada user login di localhost/admin), efeknya halaman cart akan kosong
-        cartItems = order['get_cart_items']
-
-        for i in cart:
-            cartItems += cart[i]['quantity'] # ditambah sama quantitiy, tiap product dibedakan sama id nya (kalau ngga salah sih gitu pemahamanku)
-
-            # render total harganya -> biar muncul di cart.html
-            product = Product.objects.get(id=i)
-            total = (product.price * cart[i]['quantity'])
-
-            order['get_cart_total'] += total
-            order['get_cart_items'] += cart[i]['quantity']
-
-            # render itemnya
-            item = {
-                'product': {
-                    'id': product.id,
-                    'name': product.name,
-                    'price': product.price,
-                    'imageURL': product.imageURL
-                },
-                'quantity': cart[i]['quantity'],
-                'get_total': total,
-            }
-
-            items.append(item)
+    data = cartData(request)
+    cartItems = data['cartItems']
+    order = data['order']
+    items = data['items']
 
     context = {
         'items': items,
@@ -76,15 +35,10 @@ def cart(request):
     return render(request, 'store/cart.html', context)
 
 def checkout(request):
-    if request.user.is_authenticated:
-        customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        items = order.orderitem_set.all()
-        cartItems = order.get_cart_items
-    else:
-        items = []
-        order = {'get_cart_total': 0, 'get_cart_items': 0} #percobaan kalau logout (ngga ada user login di localhost/admin), efeknya halaman cart akan kosong
-        cartItems = order['get_cart_items']
+    data = cartData(request)
+    cartItems = data['cartItems']
+    order = data['order']
+    items = data['items']
 
     context = {
         'items': items,
