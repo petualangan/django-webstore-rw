@@ -139,6 +139,10 @@ var shipping = '{{order.shipping}}' //<!-- ini dari models.py bagian class Order
         .then((data) => {
             console.log('Success:', data)
             alert('Transaction completed'); //<!-- memunculkan alert di browser-->
+
+            cart = {}
+            document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
+
             window.location.href = '{% url 'store' %}' //<!-- berpindah kehalaman store -->
         })
     }

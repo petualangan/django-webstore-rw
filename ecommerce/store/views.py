@@ -3,7 +3,7 @@ from .models import * #import semua yang ada di models
 from django.http import JsonResponse
 import json
 import datetime
-from .utils import cookieCart, cartData
+from .utils import cookieCart, cartData, guestOrder
 
 # Create your views here.
 # Mendefinisikan halaman web
@@ -80,23 +80,23 @@ def processOrder(request):
     if request.user.is_authenticated:
         customer = request.user.customer
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        total = float(data['form']['total']) #  data itu variable yang dibuat diatas itu | form ada dibagian script -> checkout.html
-        order.transaction_id = transaction_id
-
-        if total == order.get_cart_total:
-            order.complete = True # dihalaman admin sih ini, ada di bagian order checkbox complete
-        order.save()
-
-        if order.shipping == True: # kalo barang butuh dikirim
-            ShippingAddress.objects.create(
-                customer = customer,
-                order = order,
-                address = data['shipping']['address'], # ambil data nya, ambil shipping -> script di checkout.html, ambil addressnya
-                city = data['shipping']['city'],
-                state = data['shipping']['state'],
-                zipcode = data['shipping']['zipcode']
-            )
     else:
-        print('User is not logged in')
+        customer, order = guestOrder(request, data)
 
+    total = float(data['form']['total'])  # data itu variable yang dibuat diatas itu | form ada dibagian script -> checkout.html
+    order.transaction_id = transaction_id
+
+    if total == order.get_cart_total:
+        order.complete = True  # dihalaman admin sih ini, ada di bagian order checkbox complete
+    order.save()
+
+    if order.shipping == True:  # kalo barang butuh dikirim
+        ShippingAddress.objects.create(
+            customer=customer,
+            order=order,
+            address=data['shipping']['address'],# ambil data nya, ambil shipping -> script di checkout.html, ambil addressnya
+            city=data['shipping']['city'],
+            state=data['shipping']['state'],
+            zipcode=data['shipping']['zipcode']
+        )
     return JsonResponse('Payment complete!', safe=False)

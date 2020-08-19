@@ -52,13 +52,13 @@ function addCookieItem(productId, action){
 	if(action == 'remove'){
 		cart[productId]['quantity'] -= 1
 
-		if(cart[productId][quantity] <= 0){ // kalau kurang dari satu, delete product
+		if(cart[productId]['quantity'] <= 0){ // kalau kurang dari satu, delete product
 			console.log('Item should be deleted')
 			delete cart[productId]
 		}
 	}
 	console.log('CART:', cart)
-	document.cookie = 'cart=' + JSON.stringify(cart) + ";domain;path=/"
+	document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
 
 	location.reload()
 }
